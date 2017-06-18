@@ -1,7 +1,7 @@
 TARGETS   := resource
 CPP       := g++ #clang++
 LDFLAGS   := -O0 -g
-CPPFLAGS  := -O0 -g -Wall
+CPPFLAGS  := -O0 -g -Wall -std=c++11
 INCLUDES  := -I/usr/include
 
 MATCHERS  := CA \
