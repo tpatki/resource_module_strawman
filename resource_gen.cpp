@@ -14,16 +14,16 @@ int resource_generator_t::path_prefix (const string &path,
 {
     vector<string> tokens;
     split(tokens, path, is_any_of ("/"), token_compress_on);
-    if (uplevel >= tokens.size () - 1)
+    if (uplevel >= (int) tokens.size () - 1)
         return -1;
     int i = 0;
     prefix = "/";
-    for (i = 1; i < tokens.size () - uplevel; i++)
+    for (i = 1; i < (int) tokens.size () - uplevel; i++)
         prefix += tokens[i] + "/";
     prefix[prefix.size ()] = '\0';
-    
+
     return 0;
-    
+
 }
 
 int resource_generator_t::gen_id (const resource_graph_t &g, id_meth_t im,
@@ -42,17 +42,17 @@ int resource_generator_t::gen_id (const resource_graph_t &g, id_meth_t im,
         id = -1;
         break;
     }
-    
+
     return id;
 }
-    
+
 vtx_t resource_generator_t::gen_new (const vtx_t &p,
           const sspec_t &s, int i, resource_graph_db_t &db)
 {
     vtx_t v;
     edg_t e;
     bool inserted;
-    
+
     v = add_vertex (db.resource_graph);
     db.resource_graph[v].type = s.type;
     db.resource_graph[v].basename = s.basename;
@@ -80,10 +80,10 @@ vtx_t resource_generator_t::gen_new (const vtx_t &p,
     db.by_type[db.resource_graph[v].type].push_back (v);
     db.by_name[db.resource_graph[v].name].push_back (v);
     db.by_path[db.resource_graph[v].paths[s.ssys]].push_back (v);
-    
+
     return v;
 }
-    
+
 int resource_generator_t::gen_children (const vtx_t &p,
         const std::vector<sspec_t *> &c, resource_graph_db_t &db)
 {
@@ -96,7 +96,7 @@ int resource_generator_t::gen_children (const vtx_t &p,
         int i = 0;
         vector<vtx_t>::const_iterator ti;
         const sspec_t &cs = *(*iter);
-        
+
         switch (cs.gen_info.rmeth) {
             case NEW:
                 for (i = 0; i < cs.count; ++i) {
@@ -161,7 +161,7 @@ int resource_generator_t::gen_children (const vtx_t &p,
                 break;
         }
     }
-    
+
     return rc;
 }
 

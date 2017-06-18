@@ -3,7 +3,7 @@
 //!
 // TODO: This needs to be redesigned so that each different
 // TODO: Determine where the planner should reside.
-//! TODO: how to make sched_data can be plugged in
+// TODO: how to make sched_data can be plugged in
 
 #include <string>
 #include <map>
@@ -25,9 +25,9 @@ namespace flux_resource_model {
         RESOURCE_UNKNOWN,
         RESOURCE_END
     };
-    
+
     typedef std::string single_subsystem_t;
-    
+
     //!
     //! Multi-subsystem type --
     //! Key: subsystem name, Value: relationship type.
@@ -37,7 +37,7 @@ namespace flux_resource_model {
         single_subsystem_t,
         std::string
     > multi_subsystems_t;
-    
+
     //!
     //! Multi-subsystem selector type --
     //! Used to filter the graph based on the subsystem names
@@ -63,7 +63,7 @@ namespace flux_resource_model {
         std::map<int64_t, int64_t> reservtns;
         std::map<int64_t, int64_t> twindow;
     };
-    
+
     //!
     //! Resource pool type --
     //! TODO: how to make sched_data can be plugged in
@@ -85,7 +85,7 @@ namespace flux_resource_model {
         boost::default_color_type color_map;
         multi_subsystems_t member_of;
     };
-    
+
     //!
     //! Resource relationship type --
     //! An edge can be annotated with a set of

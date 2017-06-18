@@ -29,7 +29,7 @@ namespace flux_resource_model {
 
         void incr () { m_trav_level++; }
         void decr () { m_trav_level--; }
-        
+
         //!
         //! Called back on each preorder visit of the dominant subsystem.
         //! \param u     descriptor of the visiting vertex
@@ -47,7 +47,7 @@ namespace flux_resource_model {
                       << " " <<std::endl;
             return MATCHER_SCORE_BASELINE;
         }
-        
+
         //!
         //! Called back on each postorder visit of the dominant subsystem. Should
         //! return a score calculated based on the subtree and up walks. Any score
@@ -70,7 +70,7 @@ namespace flux_resource_model {
             decr ();
             return MATCHER_SCORE_BASELINE;
         }
-        
+
         //!
         //! Called back on traversing a tree edge of the dominant subsystem
         //!
@@ -84,7 +84,7 @@ namespace flux_resource_model {
                       << std::endl;
             return MATCHER_SCORE_BASELINE;
         }
-        
+
         //!
         //! Called back on traversing a back edge of the dominant subsystem.
         //! This means a cycle, and default action is not to traverse this
@@ -100,7 +100,7 @@ namespace flux_resource_model {
                       << std::endl;
             return MATCHER_SCORE_BASELINE;
         }
-        
+
         //!
         //! Called back on traversing a forward or cross edge
         //! of the dominant subsystem.
@@ -115,7 +115,7 @@ namespace flux_resource_model {
                       << std::endl;
             return MATCHER_SCORE_BASELINE;
         }
-        
+
         //!
         //! Called back on each pre-up visit of an auxiliary subsystem.
         //! \param u     descriptor of the visiting vertex
@@ -132,7 +132,7 @@ namespace flux_resource_model {
                       << " " <<std::endl;
             return MATCHER_SCORE_BASELINE;
         }
-        
+
         //!
         //! Called back on each post-up visit of the auxiliary subsystem. Should
         //! return a score calculated based on the subtree and up walks. Any score
@@ -158,7 +158,7 @@ namespace flux_resource_model {
         }
 
         //!
-        //! Called back on traversing an up edge of an auxiliary subsystem 
+        //! Called back on traversing an up edge of an auxiliary subsystem
         //! The target vertex has not been visited by dominant depth first visit
         //!
         //! \param e     descriptor of the traversing edge
@@ -171,9 +171,9 @@ namespace flux_resource_model {
                       << std::endl;
             return MATCHER_SCORE_BASELINE;
         }
-        
+
         //!
-        //! Called back on traversing an back edge of an auxiliary subsystem 
+        //! Called back on traversing an back edge of an auxiliary subsystem
         //! The target vertex is being visited by dominant depth first visit
         //!
         //! \param e     descriptor of the traversing edge
@@ -186,9 +186,9 @@ namespace flux_resource_model {
                       << std::endl;
             return MATCHER_SCORE_BASELINE;
         }
-        
-        //!
-        //! Called back on traversing an up edge of an auxiliary subsystem 
+
+        //
+        //! Called back on traversing an up edge of an auxiliary subsystem
         //! The target vertex has been visited by dominant depth first visit
         //!
         //! \param e     descriptor of the traversing edge

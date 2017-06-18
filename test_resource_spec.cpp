@@ -121,7 +121,7 @@ int flux_resource_model::test_spec_build (t_scale_t scale, std::vector <sspec_t 
     sspec_t *ibnetbw = new sspec_t (use_id_minfo, "ibnetbw", "ibnetbw", 1, 1, 1, "ibnetbw");
     sspec_t *pfs1bw = new sspec_t (use_id_minfo, "pfs1bw", "pfs1bw", 1, 1, 1, "pfs1bw");
     sspec_t *powerpanel = new sspec_t (use_id_minfo, "powerpanel", "powerpanel", 1, 1, 1, "power");
-    
+
     spec_containment_subsystem (cluster, &sparams[scale]);
     specs.push_back (cluster);
     spec_ibnet_subsystem (ibnet, &sparams[scale]);
@@ -160,7 +160,7 @@ int flux_resource_model::test_spec_string_to_scale (string st, t_scale_t &scale)
         scale = TS_LARGEST;
     else
         rc = -1;
-    
+
     return rc;
 }
 

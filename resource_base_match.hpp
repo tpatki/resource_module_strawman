@@ -21,7 +21,7 @@ namespace flux_resource_model {
         MATCHER_WALK_ERROR,
         MATCHER_SCORE_BASELINE,
     };
-    
+
     //!
     //! Base matcher class.
     //! Provides idiom to specify the target subsystems and
@@ -80,12 +80,12 @@ namespace flux_resource_model {
         {
             m_name = name;
         }
-        
+
         const std::vector<single_subsystem_t> &get_subsystems ()
         {
             return m_subsystems;
         }
-        
+
         //!
         //! \return      return the dominant subsystem this matcher has selected to use
         //!
@@ -93,7 +93,7 @@ namespace flux_resource_model {
         {
             return *(m_subsystems.begin());
         }
-        
+
         //!
         //! \return      return the subsystem selector to be used in graph filtering
         //!

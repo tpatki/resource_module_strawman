@@ -3,8 +3,8 @@
 //!
 
 // TODO: Perf profilng for graph setup and walk i
-//        -- target of 1 sec of the full tree walk for largest configuration 
-// TODO: matcher/traverser plugin architecture 
+//        -- target of 1 sec of the full tree walk for largest configuration
+// TODO: matcher/traverser plugin architecture
 
 #include <cstdint>
 #include <map>
@@ -40,7 +40,7 @@ struct test_params_t {
     resource_graph_format_t o_format;
 };
 
-// Use a context structure to make it easy to move this to our module environment 
+// Use a context structure to make it easy to move this to our module environment
 struct resource_context_t {
     test_params_t params;
     resource_graph_db_t db;
@@ -95,7 +95,7 @@ static void usage (int code)
 "                C+PA: Containment and Power-Aware\n"
 "                IB+IBBA: InfiniBand connection and Bandwidth-Aware\n"
 "                C+P+IBA: Containment, Power and InfiniBand connection-Aware\n"
-"                ALL: Aware of everything. \n"
+"                ALL: Aware of everything.\n"
 "            (default=CA).\n"
 "\n"
 "    -l, --list-subsystems\n"
@@ -135,7 +135,7 @@ static int string_to_graph_format (string st, resource_graph_format_t &format)
         format = NEO4J_CYPHER;
     else
         rc = -1;
-    
+
     return rc;
 }
 
@@ -155,7 +155,7 @@ static int graph_format_to_ext (resource_graph_format_t &format, string &st)
     default:
         rc = -1;
     }
-    
+
     return rc;
 }
 
@@ -163,7 +163,7 @@ static int subsystem_exist (resource_context_t *ctx, string n)
 {
     int rc = 0;
     if (ctx->subsystems.find ("containment")
-        == ctx->subsystems.end ())    
+        == ctx->subsystems.end ())
         rc = -1;
     return rc;
 }
@@ -174,7 +174,7 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
     ctx->matcher.set_matcher_name (n);
     resource_base_dfu_matcher_t &matcher = ctx->matcher;
     const string &matcher_type = matcher.get_matcher_name ();
-    
+
     if (iequals (matcher_type, string ("CA"))) {
         if ( (rc = subsystem_exist (ctx, "containment")) == 0)
             matcher.add_subsystem ("containment", "contains");
@@ -240,14 +240,14 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
     }
     else
         rc = -1;
-    
+
     return rc;
 }
 
 static void write_to_graph (resource_context_t *ctx)
 {
     if (ctx->params.o_format != GRAPHVIZ_DOT) {
-        cout << "[ERROR] Graph format is not yet implemented:" 
+        cout << "[ERROR] Graph format is not yet implemented:"
              << endl;
         return;
     }
@@ -280,7 +280,7 @@ int main (int argc, char *argv[])
     int ch;
     resource_context_t *ctx = new resource_context_t ();
     set_default_params (ctx->params);
-    
+
     while ((ch = getopt_long (argc, argv, OPTIONS, longopts, NULL)) != -1) {
         switch (ch) {
             case 'h': /* --help */
@@ -314,11 +314,11 @@ int main (int argc, char *argv[])
                 break;
         }
     }
-    
+
     if (optind != argc)
         usage (1);
-    
-    
+
+
     //
     // Build a test resource specification
     //
@@ -327,7 +327,7 @@ int main (int argc, char *argv[])
     vector <sspec_t *>::iterator iter;
     for (iter = spec_vect.begin (); iter != spec_vect.end (); iter++)
         ctx->subsystems[(*iter)->ssys] = "";
-    
+
     //
     // Generate a resource graph db
     //
@@ -352,23 +352,23 @@ int main (int argc, char *argv[])
                 ctx->matcher.get_subsystemsS ());
     f_resource_graph_t *fg = new f_resource_graph_t (g, edgsel, vtxsel);
     ctx->resource_graph_views[ctx->params.matcher_name] = fg;
-    
+
     //
-    // Traverse 
+    // Traverse
     //
     struct timeval st, et;
     gettimeofday (&st, NULL);
     ctx->traverser.begin_walk (*fg, ctx->db.roots, ctx->matcher);
     gettimeofday (&et, NULL);
-    
+
     //
-    // Walk elapse time 
+    // Walk elapse time
     //
     cout << "*********************************************************" << endl;
     cout << "* Elapse time "   << to_string (elapse_time (st, et)) << endl;
     cout << "*   Start Time: " << to_string (st.tv_sec)  << "."
                                << to_string (st.tv_usec) << endl;
-    cout << "*   End Time: "   << to_string (et.tv_sec)  << "." 
+    cout << "*   End Time: "   << to_string (et.tv_sec)  << "."
                                << to_string (et.tv_usec) << endl;
     cout << "*********************************************************" << endl;
 
@@ -377,7 +377,7 @@ int main (int argc, char *argv[])
     //
     if (ctx->params.o_fname != "")
         write_to_graph (ctx);
-    
+
     return EXIT_SUCCESS;
 }
 

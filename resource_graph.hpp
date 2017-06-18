@@ -17,13 +17,13 @@
 #define RESOURCE_GRAPH_HPP
 
 namespace flux_resource_model {
-    
+
     using namespace boost;
-    
+
     struct gname_t {
         std::string graph_name;
     };
-    
+
     typedef adjacency_list<
         vecS,
         vecS,
@@ -32,22 +32,22 @@ namespace flux_resource_model {
         resource_relation_t,
         gname_t
     > resource_graph_t;
-    
+
     typedef property_map<
         resource_graph_t,
         multi_subsystems_t resource_relation_t::*
     >::type edg_subsystems_map_t;
-    
+
     typedef property_map<
         resource_graph_t,
         multi_subsystems_t resource_pool_t::*
     >::type vtx_subsystems_map_t;
-    
+
     typedef graph_traits<resource_graph_t>::vertex_descriptor vtx_t;
     typedef graph_traits<resource_graph_t>::edge_descriptor edg_t;
     typedef graph_traits<resource_graph_t>::vertex_iterator vtx_iterator;
     typedef graph_traits<resource_graph_t>::edge_iterator edg_iterator;
-    
+
     struct resource_graph_db_t {
         resource_graph_t resource_graph;
         std::map<std::string, vtx_t> roots;
@@ -55,7 +55,7 @@ namespace flux_resource_model {
         std::map<std::string, std::vector <vtx_t> > by_name;
         std::map<std::string, std::vector <vtx_t> > by_path;
     };
-    
+
     template <typename EV, typename SubsystemMap>
     class subsystem_selector_t {
     public:
@@ -90,26 +90,26 @@ namespace flux_resource_model {
         // TODO: Can't use a pointer because property map is from get()
         SubsystemMap m_s;
     };
-    
+
     typedef boost::filtered_graph<
         resource_graph_t,
         subsystem_selector_t<edg_t, edg_subsystems_map_t>,
         subsystem_selector_t<vtx_t, vtx_subsystems_map_t>
     > f_resource_graph_t;
-    
+
     typedef property_map<
         f_resource_graph_t,
         default_color_type resource_pool_t::*
     >::type resource_color_map_t;
-    
+
     typedef boost::graph_traits<
         f_resource_graph_t
     >::vertex_iterator f_vtx_iterator;
-    
+
     typedef boost::graph_traits<
         f_resource_graph_t
     >::edge_iterator f_edg_iterator;
-    
+
     // TODO self-sorting accumulator
     struct scored_vtx_t {
         vtx_t v;
@@ -117,7 +117,7 @@ namespace flux_resource_model {
     };
     typedef std::set<scored_vtx_t> ordered_accumulator_t;
     typedef ordered_accumulator_t::iterator out_iterator;
- 
+
     //
     // Graph Output API
     //
@@ -130,7 +130,6 @@ namespace flux_resource_model {
     class edge_label_writer_t {
     public:
         edge_label_writer_t (edg_subsystems_map_t &_props) : props(_props) {}
-        template
         void operator()(std::ostream& out, const edg_t &e) const {
             std::string subs1 = props[e].begin()->first;
             out << "[label=\"" << props[e][subs1] << "\"]";

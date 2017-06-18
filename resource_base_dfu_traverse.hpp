@@ -8,7 +8,7 @@
 // TODO: better than linear edge search?
 // TODO: scoring scheme for reservation vs. allocation
 // TODO: add constraint checks for the concepts of dfu_matcher_t.
-// TODO: score has not been worked out yet 
+// TODO: score has not been worked out yet
 
 #include <iostream>
 #include "resource_base_dfu_match.hpp"
@@ -27,42 +27,42 @@ namespace flux_resource_model {
 template<typename dfu_matcher_t>
     class resource_base_dfu_traverser_t
     {
-    public: 
+    public:
         resource_base_dfu_traverser_t () { }
         ~resource_base_dfu_traverser_t () { }
-        
+
         //!
-        //! Begin walk. Require a matcher that complies with DF-UP traverser 
+        //! Begin walk. Require a matcher that complies with DF-UP traverser
         //! visits on the dominant subsystem and the up visits on each and every
         //! auxiliary subsystem (i.e., ordered list).
         //!
         //! \param g     a graph filtered according to the vtx/edg selectors
         //!              of dfu_matcher_t m.
-        //! \param roots map containing roots of all subsystems 
+        //! \param roots map containing roots of all subsystems
         //! \param m     dfu_matcher_t
         //! \return      0 on success; non-zero integer on an error
         //!
         int begin_walk (f_resource_graph_t &g,
                         std::map<std::string, vtx_t> roots,
                         dfu_matcher_t &m);
-        
+
     private:
         int aux_event (f_resource_graph_t &g, edg_t e, default_color_type c,
                        resource_color_map_t &color, const single_subsystem_t &h,
                        dfu_matcher_t &matcher);
-        
+
         int dom_event (f_resource_graph_t &g, edg_t e, default_color_type c,
                        resource_color_map_t &color, dfu_matcher_t &matcher);
-        
+
         int aux_upv (f_resource_graph_t &g, vtx_t v, resource_color_map_t &color,
                      const single_subsystem_t &h, dfu_matcher_t &matcher);
-        
+
         int dom_dfv (f_resource_graph_t &g, vtx_t v, resource_color_map_t &color,
                      dfu_matcher_t &matcher);
 
         std::map<std::string, vtx_t> cp_roots;
     };
-    
+
     template<typename dfu_matcher_t>
     int resource_base_dfu_traverser_t<dfu_matcher_t>::begin_walk (
             f_resource_graph_t &g,
@@ -74,7 +74,7 @@ template<typename dfu_matcher_t>
         vtx_t root = cp_roots[matcher.get_dom_subsystem ()];
         return dom_dfv (g, root, color, matcher);
     }
-    
+
     template <typename dfu_matcher_t>
     int resource_base_dfu_traverser_t<dfu_matcher_t>::aux_event (
             f_resource_graph_t &g,
@@ -96,7 +96,7 @@ template<typename dfu_matcher_t>
         }
         return aux_upv (g, target (e, g), color, h, matcher);
     }
-    
+
     template <typename dfu_matcher_t>
     int resource_base_dfu_traverser_t<dfu_matcher_t>::dom_event (
             f_resource_graph_t &g,
@@ -120,7 +120,7 @@ template<typename dfu_matcher_t>
         }
         return score;
     }
-    
+
     template <typename dfu_matcher_t>
     int resource_base_dfu_traverser_t<dfu_matcher_t>::aux_upv (
             f_resource_graph_t &g,
@@ -137,8 +137,8 @@ template<typename dfu_matcher_t>
         // Preorder filter can reduce the further search
         if (matcher.aux_discover_vtx (v, g) == MATCHER_WALK_PRUNED)
             return MATCHER_WALK_PRUNED;
-        
-        if (v != cp_roots[h]) { 
+
+        if (v != cp_roots[h]) {
             tie (ei, ei_end) = out_edges (v, g);
             for (; ei != ei_end; ++ei) {
                 // linear search !!  BGL doesn't have edge lookup by its property
@@ -152,11 +152,11 @@ template<typename dfu_matcher_t>
                 }
             }
         }
-        
+
         // Don't color a visit on an auxiliary subsystem
         return matcher.aux_finish_vtx (v, score_map, g);
     }
-    
+
     template <typename dfu_matcher_t>
     int resource_base_dfu_traverser_t<dfu_matcher_t>::dom_dfv (
             f_resource_graph_t &g,
@@ -169,27 +169,27 @@ template<typename dfu_matcher_t>
         std::map<single_subsystem_t, std::vector<int> > score_map;
         default_color_type c;
         color[v] = gray_color;
-        
+
         if (matcher.dom_discover_vtx (v, g) == MATCHER_WALK_PRUNED)
             return MATCHER_WALK_PRUNED;
-        
-        // Walk down the dominant subsystem 
+
+        // Walk down the dominant subsystem
         std::vector<single_subsystem_t>::const_iterator iter;
         iter = matcher.get_subsystems ().begin ();
-        
+
         tie (ei, ei_end) = out_edges (v, g);
         for (; ei != ei_end; ++ei) {
             c = color[target(*ei, g)];
             if (g[*ei].member_of.find (*iter) != g[*ei].member_of.end ()) {
                 int score = dom_event (g, *ei, c, color, matcher);
                 if (score >= MATCHER_SCORE_BASELINE) {
-                    // TODO: score has not been worked out yet 
+                    // TODO: score has not been worked out yet
                     score_map[*iter].push_back (score);
                 }
             }
         }
-         
-        // Walk up each auxilary subsystem for further constraint check 
+
+        // Walk up each auxilary subsystem for further constraint check
         for (iter++; iter != matcher.get_subsystems ().end (); iter++) {
             tie (ei, ei_end) = out_edges (v, g);
             for (; ei != ei_end; ++ei) {
@@ -201,13 +201,13 @@ template<typename dfu_matcher_t>
                 }
             }
         }
-        
+
         color[v] = black_color;
         return matcher.dom_finish_vtx (v, score_map, g);
     }
 }
 
-#endif // RESOURCE_BASE_DFU_TRAVERSE_HPP 
+#endif // RESOURCE_BASE_DFU_TRAVERSE_HPP
 
 /*
  * vi:tabstop=4 shiftwidth=4 expandtab

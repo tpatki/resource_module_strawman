@@ -20,7 +20,7 @@ namespace flux_resource_model {
         int read_sspecs (const std::vector<sspec_t *> s, resource_graph_db_t &g);
         int read_sspecs (const std::string &f, resource_graph_db_t &g);
         const std::string &get_err_message ();
-        
+
     private:
         int path_prefix (const std::string &path, int uplevel, std::string &prefix);
         int gen_id (const resource_graph_t &g, id_meth_t m, const vtx_t &p, const vtx_t &v, int i);
