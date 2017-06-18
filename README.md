@@ -36,5 +36,5 @@ $ doxygen doxy_conf.txt
 $ cd ..
 ```
 This will generate html, latex and man subdirectories under
-the doc directory. Open doc/index.html using your favorate web browser 
+the doc directory. Open doc/html/index.html using your favorate web browser 
 
