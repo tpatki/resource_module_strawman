@@ -189,7 +189,7 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
     }
     else if (iequals (matcher_type, string ("PFS1BA"))) {
         if ( (rc = subsystem_exist (ctx, "pfs1bw")) == 0)
-            matcher.add_subsystem ("pfs1bw", "flows_up");
+            matcher.add_subsystem ("pfs1bw", "*");
     }
     else if (iequals (matcher_type, string ("PA"))) {
         if ( (rc = subsystem_exist (ctx, "power")) == 0)
@@ -199,7 +199,7 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
         if ( (rc = subsystem_exist (ctx, "containment")) == 0)
             matcher.add_subsystem ("containment", "contains");
         if ( !rc && (rc = subsystem_exist (ctx, "PFS1BA")) == 0)
-            matcher.add_subsystem ("pfs1bw", "flows_up");
+            matcher.add_subsystem ("pfs1bw", "*");
     }
     else if (iequals (matcher_type, string ("C+IBA"))) {
         if ( (rc = subsystem_exist (ctx, "containment")) == 0)
@@ -237,33 +237,52 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
             matcher.add_subsystem ("pfs1bw", "*");
         if ( (rc = subsystem_exist (ctx, "power")) == 0)
             matcher.add_subsystem ("power", "*");
-    }
+    } 
     else
         rc = -1;
 
     return rc;
 }
 
+static void write_to_graphviz (f_resource_graph_t &fg, fstream &o)
+{
+    edg_subsystems_map_t emap = get(&resource_relation_t::member_of, fg);
+    edge_label_writer_t ewr (emap);
+    write_graphviz (o, fg,
+        make_label_writer (get(&resource_pool_t::name, fg)), ewr);
+}
+
+static void write_to_graphml (f_resource_graph_t &fg, fstream &o)
+{
+    dynamic_properties dp;
+    dp.property ("name", get (&resource_pool_t::name, fg));
+    dp.property ("name", get (&resource_relation_t::name, fg));
+    write_graphml(o, fg, dp, true);
+
+}
+
 static void write_to_graph (resource_context_t *ctx)
 {
-    if (ctx->params.o_format != GRAPHVIZ_DOT) {
-        cout << "[ERROR] Graph format is not yet implemented:"
-             << endl;
-        return;
-    }
-
     fstream o;
     string fn, mn;
     mn = ctx->matcher.get_matcher_name ();
     f_resource_graph_t &fg = *(ctx->resource_graph_views[mn]);
     fn = ctx->params.o_fname + "." + ctx->params.o_fext;
     o.open (fn, fstream::out);
-
     cout << "[INFO] Write the target graph of the matcher..." << endl;
-    edg_subsystems_map_t emap = get(&resource_relation_t::member_of, fg);
-    edge_label_writer_t ewr (emap);
-    write_graphviz (o, fg,
-        make_label_writer (get(&resource_pool_t::name, fg)), ewr);
+    switch (ctx->params.o_format) {
+    case GRAPHVIZ_DOT:
+        write_to_graphviz (fg, o);
+        break;
+    case GRAPH_ML:
+        write_to_graphml (fg, o);
+        break;
+    case NEO4J_CYPHER:
+    default:
+        cout << "[ERROR] Graph format is not yet implemented:"
+             << endl;
+        break;
+    }
     o.close ();
 }
 

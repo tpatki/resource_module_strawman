@@ -6,6 +6,7 @@
 // TODO: how to make sched_data can be plugged in
 
 #include <string>
+#include <stack>
 #include <map>
 
 #ifndef RESOURCE_DATA_HPP
@@ -70,6 +71,12 @@ namespace flux_resource_model {
     //! by the resource match plug-in.
     //!
     struct resource_pool_t {
+         ~resource_pool_t ()
+        {
+            member_of.clear ();
+            paths.clear ();
+            properties.clear ();
+        } 
         std::string type;
         std::map<std::string, std::string> paths;
         std::string basename;
@@ -82,7 +89,8 @@ namespace flux_resource_model {
         std::string unit;
         resource_state_t state;
         sched_state_t sched_data;
-        boost::default_color_type color_map;
+        std::map<single_subsystem_t, boost::default_color_type> color_map;
+        //boost::default_color_type color_map;
         multi_subsystems_t member_of;
     };
 
@@ -96,6 +104,8 @@ namespace flux_resource_model {
     //! the same subsystem.
     //!
     struct resource_relation_t {
+        ~resource_relation_t () { member_of.clear (); }
+        std::string name;
         multi_subsystems_t member_of;
     };
 }

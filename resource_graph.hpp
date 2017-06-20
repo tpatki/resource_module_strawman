@@ -11,6 +11,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/filtered_graph.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/graph/graphml.hpp>
 #include "resource_data.hpp"
 
 #ifndef RESOURCE_GRAPH_HPP
@@ -47,6 +48,7 @@ namespace flux_resource_model {
     typedef graph_traits<resource_graph_t>::edge_descriptor edg_t;
     typedef graph_traits<resource_graph_t>::vertex_iterator vtx_iterator;
     typedef graph_traits<resource_graph_t>::edge_iterator edg_iterator;
+    typedef graph_traits<resource_graph_t>::out_edge_iterator out_edg_iterator;
 
     struct resource_graph_db_t {
         resource_graph_t resource_graph;
@@ -99,7 +101,7 @@ namespace flux_resource_model {
 
     typedef property_map<
         f_resource_graph_t,
-        default_color_type resource_pool_t::*
+        std::map<single_subsystem_t, default_color_type> resource_pool_t::*
     >::type resource_color_map_t;
 
     typedef boost::graph_traits<

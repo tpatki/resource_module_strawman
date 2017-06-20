@@ -33,6 +33,11 @@ $(GRAPHS): resource
 		--output=graphs_dir/$(subst .,$(empty),$(suffix $@))/$@
 	cd graphs_dir/$(subst .,$(empty),$(suffix $@)) && \
 	dot -Tsvg $@.dot -o images/$@.svg
+	mkdir -p graphmls_dir/$(subst .,$(empty),$(suffix $@))
+	$< --graph-scale=$(subst .,$(empty),$(suffix $@)) \
+		--matcher=$(basename $@) \
+		--graph-format=graphml \
+		--output=graphmls_dir/$(subst .,$(empty),$(suffix $@))/$@
 
 resource_gen: resource_gen.o
 	$(CPP) $(LDFLAGS) $^ -o $@
@@ -48,6 +53,6 @@ test_resource_spec: test_resource_spec.o
 clean:
 	rm -f *.o *~ $(TARGETS)
 
-clean-graph: 
+clean-graphs: 
 	rm -f -r graphs_dir/*
 

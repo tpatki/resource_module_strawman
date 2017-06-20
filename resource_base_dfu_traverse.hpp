@@ -83,18 +83,21 @@ template<typename dfu_matcher_t>
             const single_subsystem_t &h,
             dfu_matcher_t &matcher)
     {
+        int score = MATCHER_WALK_NOT_TREE_EDGE;
         switch (c) {
             case white_color:
                 matcher.aux_up_edge (e, g);
+                aux_upv (g, target (e, g), color, h, matcher);
                 break;
             case gray_color:
-                matcher.aux_up_dom_back_edge (e, g);
+                // stop to go further up -- cycle 
+                matcher.aux_up_back_edge (e, g);
                 break;
             default:
-                matcher.aux_up_dom_forward_or_cross_edge (e, g);
+                matcher.aux_up_forward_edge (e, g);
                 break;
         }
-        return aux_upv (g, target (e, g), color, h, matcher);
+        return score;
     }
 
     template <typename dfu_matcher_t>
@@ -133,7 +136,7 @@ template<typename dfu_matcher_t>
         graph_traits<f_resource_graph_t>::out_edge_iterator ei_end;
         std::map<single_subsystem_t, std::vector<int> > score_map;
 
-        // Don't color a visit on an auxiliary subsystem
+        color[v][h] = gray_color;
         // Preorder filter can reduce the further search
         if (matcher.aux_discover_vtx (v, g) == MATCHER_WALK_PRUNED)
             return MATCHER_WALK_PRUNED;
@@ -145,7 +148,7 @@ template<typename dfu_matcher_t>
                 if (g[*ei].member_of.find (h) != g[*ei].member_of.end ()) {
                     // we trasparent pass even MATCHER_WALK_PRUNED or ERROR
                     // to post-up callback
-                    default_color_type c = color[target(*ei, g)];
+                    default_color_type c = color[target(*ei, g)][h];
                     score_map[h].push_back (
                         aux_event (g, *ei, c, color, h, matcher));
                     break;
@@ -153,7 +156,7 @@ template<typename dfu_matcher_t>
             }
         }
 
-        // Don't color a visit on an auxiliary subsystem
+        color[v][h] = white_color;
         return matcher.aux_finish_vtx (v, score_map, g);
     }
 
@@ -168,7 +171,7 @@ template<typename dfu_matcher_t>
         graph_traits<f_resource_graph_t>::in_edge_iterator iei, iei_end;
         std::map<single_subsystem_t, std::vector<int> > score_map;
         default_color_type c;
-        color[v] = gray_color;
+        color[v][matcher.get_dom_subsystem ()] = gray_color;
 
         if (matcher.dom_discover_vtx (v, g) == MATCHER_WALK_PRUNED)
             return MATCHER_WALK_PRUNED;
@@ -179,7 +182,7 @@ template<typename dfu_matcher_t>
 
         tie (ei, ei_end) = out_edges (v, g);
         for (; ei != ei_end; ++ei) {
-            c = color[target(*ei, g)];
+            c = color[target(*ei, g)][matcher.get_dom_subsystem ()];
             if (g[*ei].member_of.find (*iter) != g[*ei].member_of.end ()) {
                 int score = dom_event (g, *ei, c, color, matcher);
                 if (score >= MATCHER_SCORE_BASELINE) {
@@ -193,7 +196,7 @@ template<typename dfu_matcher_t>
         for (iter++; iter != matcher.get_subsystems ().end (); iter++) {
             tie (ei, ei_end) = out_edges (v, g);
             for (; ei != ei_end; ++ei) {
-                c = color[target(*ei, g)];
+                c = color[target(*ei, g)][matcher.get_dom_subsystem ()];
                 if (g[*ei].member_of.find (*iter) != g[*ei].member_of.end ()) {
                     score_map[*iter].push_back (
                         aux_event (g, *ei, c, color, *iter, matcher));
@@ -202,7 +205,7 @@ template<typename dfu_matcher_t>
             }
         }
 
-        color[v] = black_color;
+        color[v][matcher.get_dom_subsystem ()] = black_color;
         return matcher.dom_finish_vtx (v, score_map, g);
     }
 }

@@ -65,10 +65,12 @@ vtx_t resource_generator_t::gen_new (const vtx_t &p,
     if (s.gen_info.p2me_type != "") {
         tie (e, inserted) = add_edge (p, v, db.resource_graph);
         db.resource_graph[e].member_of[s.ssys] = s.gen_info.p2me_type;
+        db.resource_graph[e].name += ":" + s.ssys + "." + s.gen_info.p2me_type;
     }
     if (s.gen_info.me2p_type != "") {
         tie (e, inserted) = add_edge (v, p, db.resource_graph);
         db.resource_graph[e].member_of[s.ssys] = s.gen_info.me2p_type;
+        db.resource_graph[e].name += ":" + s.ssys + "." + s.gen_info.p2me_type;
     }
     string idstr = (db.resource_graph[v].id != -1)
                     ? to_string (db.resource_graph[v].id)
@@ -84,13 +86,26 @@ vtx_t resource_generator_t::gen_new (const vtx_t &p,
     return v;
 }
 
+edg_t resource_generator_t::found_or_new_edge (const vtx_t &u,
+          const vtx_t &v, resource_graph_t &g)
+{
+    edg_t e;
+    bool inserted;
+    out_edg_iterator e_i, e_end; 
+    tie (e_i, e_end) = out_edges (u, g);
+    for (; e_i != e_end; e_i++)
+        if (target (*e_i, g) == v)
+            return *e_i;
+    tie (e, inserted) = add_edge (u, v, g);
+    return e;
+}
+
 int resource_generator_t::gen_children (const vtx_t &p,
         const std::vector<sspec_t *> &c, resource_graph_db_t &db)
 {
     int rc = 0;
     vtx_t v;
     edg_t e;
-    bool inserted;
     vector<sspec_t *>::const_iterator iter;
     for (iter = c.begin (); iter != c.end (); iter++) {
         int i = 0;
@@ -113,14 +128,18 @@ int resource_generator_t::gen_children (const vtx_t &p,
                           + "/" + db.resource_graph[v].name;
                     db.resource_graph[v].member_of[cs.ssys] = "*";
                     if (cs.gen_info.p2me_type != "") {
-                        tie (e, inserted) = add_edge (p, v, db.resource_graph);
+                        e = found_or_new_edge (p, v, db.resource_graph); 
                         db.resource_graph[e].member_of[cs.ssys]
                             = cs.gen_info.p2me_type;
+                        db.resource_graph[e].name += ":" + cs.ssys + "."
+                            + cs.gen_info.p2me_type;
                     }
                     if (cs.gen_info.me2p_type != "") {
-                        tie (e, inserted) = add_edge (v, p, db.resource_graph);
+                        e = found_or_new_edge (v, p, db.resource_graph); 
                         db.resource_graph[e].member_of[cs.ssys]
                             = cs.gen_info.me2p_type;
+                        db.resource_graph[e].name += ":" + cs.ssys + "."
+                            + cs.gen_info.me2p_type;
                     }
                     rc += gen_children (v, cs.children, db);
                 }
@@ -143,14 +162,18 @@ int resource_generator_t::gen_children (const vtx_t &p,
                           + "/" + db.resource_graph[v].name;
                     db.resource_graph[v].member_of[cs.ssys] = "*";
                     if (cs.gen_info.p2me_type != "") {
-                        tie (e, inserted) = add_edge (p, v, db.resource_graph);
+                        e = found_or_new_edge (p, v, db.resource_graph); 
                         db.resource_graph[e].member_of[cs.ssys]
                             = cs.gen_info.p2me_type;
+                        db.resource_graph[e].name += ":" + cs.ssys + "."
+                            + cs.gen_info.p2me_type;
                     }
                     if (cs.gen_info.me2p_type != "") {
-                        tie (e, inserted) = add_edge (v, p, db.resource_graph);
+                        e = found_or_new_edge (v, p, db.resource_graph); 
                         db.resource_graph[e].member_of[cs.ssys]
                             = cs.gen_info.me2p_type;
+                        db.resource_graph[e].name += ":" + cs.ssys + "."
+                            + cs.gen_info.me2p_type;
                     }
                     rc += gen_children (v, cs.children, db);
                 }

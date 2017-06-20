@@ -174,30 +174,30 @@ namespace flux_resource_model {
 
         //!
         //! Called back on traversing an back edge of an auxiliary subsystem
-        //! The target vertex is being visited by dominant depth first visit
+        //! The target vertex is being visited by the upwalk on the same subsystem 
         //!
         //! \param e     descriptor of the traversing edge
         //! \param g     filtered resource graph object
         //!
-        int aux_up_dom_back_edge (edg_t e, f_resource_graph_t &g)
+        int aux_up_back_edge (edg_t e, f_resource_graph_t &g)
         {
             std::cout << level_prefix ()
-                      << "aux_up_dom_back_edge: MAKE SURE THIS IS OK"
+                      << "aux_up_back_edge: CYCLE! CYCLE! "
                       << std::endl;
             return MATCHER_SCORE_BASELINE;
         }
 
         //
         //! Called back on traversing an up edge of an auxiliary subsystem
-        //! The target vertex has been visited by dominant depth first visit
+        //! The target vertex has been visited by the upwalk on the same subsystem
         //!
         //! \param e     descriptor of the traversing edge
         //! \param g     filtered resource graph object
         //!
-        int aux_up_dom_forward_or_cross_edge (edg_t e, f_resource_graph_t &g)
+        int aux_up_forward_edge (edg_t e, f_resource_graph_t &g)
         {
             std::cout << level_prefix ()
-                      << "aux_up_dom_forward_or_cross_edge: MAKE SURE THIS IS OK"
+                      << "aux_up_forward_edge: MAKE SURE THIS IS OK"
                       << std::endl;
             return MATCHER_SCORE_BASELINE;
         }
