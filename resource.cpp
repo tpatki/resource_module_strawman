@@ -83,7 +83,8 @@ static void usage (int code)
 "            (default=mini)\n"
 "\n"
 "    -m, --matcher="
-         "<CA|IBA|IBBA|PFS1BA|PA|C+IBA|C+PFS1BA|C+PA|IB+IBBA|C+P+IBA|ALL>\n"
+         "<CA|IBA|IBBA|PFS1BA|PA|C+IBA|C+PFS1BA|C+PA|IB+IBBA|"
+              "C+P+IBA|VA|V+PFS1BA|ALL>\n"
 "            Set the matcher to use. Available matchers are:\n"
 "                CA: Containment Aware\n"
 "                IBA: InfiniBand connection-Aware\n"
@@ -95,6 +96,8 @@ static void usage (int code)
 "                C+PA: Containment and Power-Aware\n"
 "                IB+IBBA: InfiniBand connection and Bandwidth-Aware\n"
 "                C+P+IBA: Containment, Power and InfiniBand connection-Aware\n"
+"                VA: Virtual Hierarchy-Aware \n"
+"                V+PFS1BA: Virtual Hierarchy and PFS1 Bandwidth-Aware \n"
 "                ALL: Aware of everything.\n"
 "            (default=CA).\n"
 "\n"
@@ -226,6 +229,14 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
             matcher.add_subsystem ("power", "drawn");
         if ( !rc && (rc = subsystem_exist (ctx, "IBA")) == 0)
             matcher.add_subsystem ("ibnet", "connected_up");
+    } else if (iequals (matcher_type, string ("V+PFS1BA"))) {
+        if ( (rc = subsystem_exist (ctx, "virtual1")) == 0)
+            matcher.add_subsystem ("virtual1", "*");
+        if ( !rc && (rc = subsystem_exist (ctx, "PFS1BW")) == 0)
+            matcher.add_subsystem ("pfs1bw", "*");
+    } else if (iequals (matcher_type, string ("VA"))) {
+        if ( (rc = subsystem_exist (ctx, "virtual1")) == 0)
+            matcher.add_subsystem ("virtual1", "*");
     } else if (iequals (matcher_type, string ("ALL"))) {
         if ( (rc = subsystem_exist (ctx, "containment")) == 0)
             matcher.add_subsystem ("containment", "*");
@@ -244,10 +255,11 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
     return rc;
 }
 
-static void write_to_graphviz (f_resource_graph_t &fg, fstream &o)
+static void write_to_graphviz (f_resource_graph_t &fg,
+                single_subsystem_t ss, fstream &o)
 {
     edg_subsystems_map_t emap = get(&resource_relation_t::member_of, fg);
-    edge_label_writer_t ewr (emap);
+    edge_label_writer_t ewr (emap, ss);
     write_graphviz (o, fg,
         make_label_writer (get(&resource_pool_t::name, fg)), ewr);
 }
@@ -272,7 +284,7 @@ static void write_to_graph (resource_context_t *ctx)
     cout << "[INFO] Write the target graph of the matcher..." << endl;
     switch (ctx->params.o_format) {
     case GRAPHVIZ_DOT:
-        write_to_graphviz (fg, o);
+        write_to_graphviz (fg, ctx->matcher.get_dom_subsystem (), o);
         break;
     case GRAPH_ML:
         write_to_graphml (fg, o);

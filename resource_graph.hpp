@@ -131,13 +131,20 @@ namespace flux_resource_model {
 
     class edge_label_writer_t {
     public:
-        edge_label_writer_t (edg_subsystems_map_t &_props) : props(_props) {}
+        edge_label_writer_t (edg_subsystems_map_t &_props, single_subsystem_t &s)
+            : m_props (_props), m_s (s) {}
         void operator()(std::ostream& out, const edg_t &e) const {
-            std::string subs1 = props[e].begin()->first;
-            out << "[label=\"" << props[e][subs1] << "\"]";
+            multi_subsystems_t::const_iterator i = m_props[e].find (m_s);
+            if (i != m_props[e].end ()) {
+                out << "[label=\"" << i->second << "\"]";
+            } else {
+                i = m_props[e].begin ();
+                out << "[label=\"" << i->second << "\"]";
+            }
         }
     private:
-        edg_subsystems_map_t props;
+        edg_subsystems_map_t m_props;
+        single_subsystem_t m_s;
     };
 }
 

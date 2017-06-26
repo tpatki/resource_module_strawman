@@ -14,8 +14,10 @@ MATCHERS  := CA \
              C+PA \
              IB+IBBA \
              C+P+IBA \
+             VA \
+             V+PFS1BA \
              ALL
-SCALES    := mini small #medium medplus large largest
+SCALES    := mini #small medium medplus large largest
 GRAPHS    := $(foreach m, $(MATCHERS), $(foreach s, $(SCALES), $(m).$(s)))
 
 all: $(TARGETS)

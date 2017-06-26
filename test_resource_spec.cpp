@@ -102,6 +102,22 @@ static void spec_pfs1bw_subsystem (sspec_t *pfs1bw, t_scale_param_t *s)
     sspec_t *node = new sspec_t (use_assoc_by_in_cont2, "node", "node", 1, 1, 1, "pfs1bw"); nicbw->children.push_back (node);
 }
 
+static void spec_virtual_subsystem (sspec_t *vhier, t_scale_param_t *s)
+{
+    sspec_gen_t use_assoc_in_cont (ID_GEN_USE_NONE, ASSOCIATE_IN, 0, 0, "containment", "child_of", "parent_of");
+    sspec_gen_t use_assoc_by_in_cont1 (ID_GEN_USE_NONE, ASSOCIATE_BY_PATH_IN, 1, 0, "containment", "child_of", "parent_of");
+    sspec_gen_t use_assoc_by_in_cont2 (ID_GEN_USE_NONE, ASSOCIATE_BY_PATH_IN, 1, 1, "containment", "child_of", "parent_of");
+
+
+    sspec_t *cluster = new sspec_t (use_assoc_in_cont, "cluster", "cluster", 1, 1, 1, "virtual1"); vhier->children.push_back (cluster);
+    sspec_t *rack = new sspec_t (use_assoc_in_cont, "rack", "rack", 1, 1, 1, "virtual1"); cluster->children.push_back (rack);
+    sspec_t *es = new sspec_t (use_assoc_by_in_cont1, "edgeswitch", "edgeswitch", 0, 0, 0, "virtual1"); rack->children.push_back (es);
+    sspec_t *node = new sspec_t (use_assoc_by_in_cont2, "node", "node", 1, 1, 1, "virtual1"); es->children.push_back (node);
+    sspec_t *socket = new sspec_t (use_assoc_by_in_cont1, "socket", "socket", 1, 1, 1, "virtual1"); node->children.push_back (socket);
+    sspec_t *core = new sspec_t (use_assoc_by_in_cont1, "core","core", 1, 1, 1, "virtual1"); socket->children.push_back (core);
+    sspec_t *gpu = new sspec_t (use_assoc_by_in_cont1, "gpu", "gpu", 1, 1, 1, "virtual1"); socket->children.push_back (gpu);
+}
+
 //
 // Public Test Resource Generation API Implementation
 //
@@ -121,6 +137,7 @@ int flux_resource_model::test_spec_build (t_scale_t scale, std::vector <sspec_t 
     sspec_t *ibnetbw = new sspec_t (use_id_minfo, "ibnetbw", "ibnetbw", 1, 1, 1, "ibnetbw");
     sspec_t *pfs1bw = new sspec_t (use_id_minfo, "pfs1bw", "pfs1bw", 1, 1, 1, "pfs1bw");
     sspec_t *powerpanel = new sspec_t (use_id_minfo, "powerpanel", "powerpanel", 1, 1, 1, "power");
+    sspec_t *vhier = new sspec_t (use_id_minfo, "vhierarchy", "vhierarchy", 1, 1, 1, "virtual1");
 
     spec_containment_subsystem (cluster, &sparams[scale]);
     specs.push_back (cluster);
@@ -132,6 +149,8 @@ int flux_resource_model::test_spec_build (t_scale_t scale, std::vector <sspec_t 
     specs.push_back (powerpanel);
     spec_pfs1bw_subsystem (pfs1bw, &sparams[scale]);
     specs.push_back (pfs1bw);
+    spec_virtual_subsystem (vhier, &sparams[scale]);
+    specs.push_back (vhier);
 
     return 0;
 }
