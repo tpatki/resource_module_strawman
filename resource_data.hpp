@@ -84,8 +84,6 @@ namespace flux_resource_model {
         std::map<std::string, std::string> properties;
         int64_t id;
         int64_t size;
-        int64_t count;
-        int stride;
         std::string unit;
         resource_state_t state;
         sched_state_t sched_data;

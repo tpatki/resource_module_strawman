@@ -5,8 +5,9 @@ LDFLAGS       := -O0 -g $(BOOST_LDFLAGS)
 CPPFLAGS      := -O0 -g -Wall -std=c++11 -MMD -MP
 INCLUDES      := -I/usr/include
 OBJS          := resource.o \
+                 genspec_graphml2dot.o \
                  resource_gen.o \
-                 test_resource_spec.o
+                 resource_gen_spec.o
 MATCHERS      := CA \
                  IBA \
                  IBBA \
@@ -17,41 +18,38 @@ MATCHERS      := CA \
                  C+PA \
                  IB+IBBA \
                  C+P+IBA \
-                 VA \
-                 V+PFS1BA \
                  ALL
 DEPS          := $(OBJS:.o=.d)
-SCALES        := mini #small medium medplus large largest
+SCALES        := mini-5subsystems-fine \
+		 medium-5subsystems-fine \
+		 medium-1subsystem-coarse
 GRAPHS        := $(foreach m, $(MATCHERS), $(foreach s, $(SCALES), $(m).$(s)))
 
-TARGETS       := resource 
+TARGETS       := resource genspec-graphml2dot
 
 all: $(TARGETS)
 
 graphs: $(GRAPHS) 
 
-resource: resource.o resource_gen.o test_resource_spec.o
+resource: resource.o resource_gen.o resource_gen_spec.o
+	$(CPP) $^ -o $@ $(LDFLAGS)
+
+genspec-graphml2dot: genspec_graphml2dot.o resource_gen_spec.o
 	$(CPP) $^ -o $@ $(LDFLAGS)
 
 $(GRAPHS): resource
 	mkdir -p graphs_dir/$(subst .,$(empty),$(suffix $@))
 	mkdir -p graphs_dir/$(subst .,$(empty),$(suffix $@))/images
-	$< --graph-scale=$(subst .,$(empty),$(suffix $@)) \
+	$< --gengraph=conf/$(subst .,$(empty),$(suffix $@)).graphml \
 		--matcher=$(basename $@) \
 		--output=graphs_dir/$(subst .,$(empty),$(suffix $@))/$@
 	cd graphs_dir/$(subst .,$(empty),$(suffix $@)) && \
 	dot -Tsvg $@.dot -o images/$@.svg
 	mkdir -p graphmls_dir/$(subst .,$(empty),$(suffix $@))
-	$< --graph-scale=$(subst .,$(empty),$(suffix $@)) \
+	$< --gengraph=conf/$(subst .,$(empty),$(suffix $@)).graphml \
 		--matcher=$(basename $@) \
 		--graph-format=graphml \
 		--output=graphmls_dir/$(subst .,$(empty),$(suffix $@))/$@
-
-resource_gen: resource_gen.o
-	$(CPP) $(LDFLAGS) $^ -o $@
-
-test_resource_spec: test_resource_spec.o
-	$(CPP) $(LDFLAGS) $^ -o $@
 
 %.o:%.cpp
 	$(CPP) $(CPPFLAGS) $(INCLUDES) $< -c -o $@
@@ -59,7 +57,7 @@ test_resource_spec: test_resource_spec.o
 .PHONY: clean
 
 clean:
-	rm -f $(OBJS) $(DEPS) $(TARGETS) *~ *.dot
+	rm -f $(OBJS) $(DEPS) $(TARGETS) *~ *.dot *.svg
 
 clean-graphs: 
 	rm -f -r graphs_dir/*

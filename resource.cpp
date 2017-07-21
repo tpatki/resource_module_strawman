@@ -11,7 +11,6 @@
 #include <getopt.h>
 #include <sys/time.h>
 #include <boost/algorithm/string.hpp>
-#include "resource_spec.hpp"
 #include "resource_graph.hpp"
 #include "resource_gen.hpp"
 #include "resource_base_dfu_traverse.hpp"
@@ -20,9 +19,9 @@ using namespace std;
 using namespace boost;
 using namespace flux_resource_model;
 
-#define OPTIONS "s:m:l:d:g:o:h"
+#define OPTIONS "e:m:l:d:g:o:h"
 static const struct option longopts[] = {
-    {"graph-scale",      required_argument,  0, 's'},
+    {"gengraph",         required_argument,  0, 'e'},
     {"matcher",          required_argument,  0, 'm'},
     {"list-subsystems",  required_argument,  0, 'l'},
     {"display-matchers", required_argument,  0, 'd'},
@@ -33,7 +32,7 @@ static const struct option longopts[] = {
 };
 
 struct test_params_t {
-    t_scale_t scale;
+    string gengraph;
     string matcher_name;
     string o_fname;
     string o_fext;
@@ -78,9 +77,9 @@ static void usage (int code)
 "    -h, --help\n"
 "            Display the usage information\n"
 "\n"
-"    -s, --graph-scale=<mini|small|medium|medplus|large|largest>\n"
-"            Set the scale of the test resource graph\n"
-"            (default=mini)\n"
+"    -e, --gengraph=<genspec>.graphml\n"
+"            Resource graph generator specification file in graphml\n"
+"            (default=conf/default)\n"
 "\n"
 "    -m, --matcher="
          "<CA|IBA|IBBA|PFS1BA|PA|C+IBA|C+PFS1BA|C+PA|IB+IBBA|"
@@ -120,7 +119,7 @@ static void usage (int code)
 
 static void set_default_params (test_params_t &params)
 {
-    params.scale = TS_MINI;
+    params.gengraph = "conf/default";
     params.matcher_name = "CA";
     params.o_fname = "";
     params.o_fext = "dot";
@@ -165,8 +164,7 @@ static int graph_format_to_ext (resource_graph_format_t &format, string &st)
 static int subsystem_exist (resource_context_t *ctx, string n)
 {
     int rc = 0;
-    if (ctx->subsystems.find ("containment")
-        == ctx->subsystems.end ())
+    if (ctx->db.roots.find ("containment") == ctx->db.roots.end ())
         rc = -1;
     return rc;
 }
@@ -248,8 +246,7 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
             matcher.add_subsystem ("pfs1bw", "*");
         if ( (rc = subsystem_exist (ctx, "power")) == 0)
             matcher.add_subsystem ("power", "*");
-    } 
-    else
+    } else
         rc = -1;
 
     return rc;
@@ -258,10 +255,11 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
 static void write_to_graphviz (f_resource_graph_t &fg,
                 single_subsystem_t ss, fstream &o)
 {
+    resource_name_map_t vmap = get(&resource_pool_t::name, fg);
     edg_subsystems_map_t emap = get(&resource_relation_t::member_of, fg);
-    edge_label_writer_t ewr (emap, ss);
-    write_graphviz (o, fg,
-        make_label_writer (get(&resource_pool_t::name, fg)), ewr);
+    vtx_label_writer_t<resource_name_map_t> vwr (vmap);
+    edg_label_writer_t ewr (emap, ss);
+    write_graphviz (o, fg, vwr, ewr);
 }
 
 static void write_to_graphml (f_resource_graph_t &fg, fstream &o)
@@ -270,7 +268,6 @@ static void write_to_graphml (f_resource_graph_t &fg, fstream &o)
     dp.property ("name", get (&resource_pool_t::name, fg));
     dp.property ("name", get (&resource_relation_t::name, fg));
     write_graphml(o, fg, dp, true);
-
 }
 
 static void write_to_graph (resource_context_t *ctx)
@@ -317,13 +314,9 @@ int main (int argc, char *argv[])
             case 'h': /* --help */
                 usage (0);
                 break;
-            case 's': /* --graph-scale */
-                rc = test_spec_string_to_scale (optarg, ctx->params.scale);
-                if ( rc != 0) {
-                    cerr << "[ERROR] unknown scale for --graph-scale: ";
-                    cerr << optarg << endl;
-                    usage (1);
-                }
+            case 'e': /* --genspec-graph*/
+                ctx->params.gengraph = optarg;
+                rc = 0;
                 break;
             case 'm': /* --matcher */
                 ctx->params.matcher_name = optarg;
@@ -349,23 +342,13 @@ int main (int argc, char *argv[])
     if (optind != argc)
         usage (1);
 
-
-    //
-    // Build a test resource specification
-    //
-    vector <sspec_t *> spec_vect;
-    test_spec_build (ctx->params.scale, spec_vect);
-    vector <sspec_t *>::iterator iter;
-    for (iter = spec_vect.begin (); iter != spec_vect.end (); iter++)
-        ctx->subsystems[(*iter)->ssys] = "";
-
     //
     // Generate a resource graph db
     //
-    resource_generator_t r_gen;
-    if ( (rc = r_gen.read_sspecs (spec_vect, ctx->db)) != 0) {
+    resource_generator_t rgen;
+    if ( (rc = rgen.read_graphml (ctx->params.gengraph, ctx->db)) != 0) {
         cerr << "[ERROR] error in generating resources" << endl;
-        cerr << "[ERROR] " << r_gen.get_err_message () << endl;
+        cerr << "[ERROR] " << rgen.get_err_message () << endl;
         return EXIT_FAILURE;
     }
     resource_graph_t &g = ctx->db.resource_graph;
@@ -374,18 +357,22 @@ int main (int argc, char *argv[])
     // Configure the matcher and its subsystem selector
     //
     cout << "[INFO] Load the matcher ..." << endl;
-    set_subsystems_use (ctx, ctx->params.matcher_name);
-    subsystem_selector_t<edg_t, edg_subsystems_map_t>
-        edgsel (get (&resource_relation_t::member_of, g),
-                ctx->matcher.get_subsystemsS ());
-    subsystem_selector_t<vtx_t, vtx_subsystems_map_t>
-        vtxsel (get (&resource_pool_t::member_of, g),
-                ctx->matcher.get_subsystemsS ());
+    if (set_subsystems_use (ctx, ctx->params.matcher_name) != 0) {
+        cerr << "[ERROR] error in finding the matcher: "
+             << ctx->params.matcher_name << endl;
+        return EXIT_FAILURE;
+    }
+    subsystem_selector_t<edg_t, edg_subsystems_map_t> edgsel (
+        get (&resource_relation_t::member_of, g),
+        ctx->matcher.get_subsystemsS ());
+    subsystem_selector_t<vtx_t, vtx_subsystems_map_t> vtxsel (
+        get (&resource_pool_t::member_of, g),
+        ctx->matcher.get_subsystemsS ());
     f_resource_graph_t *fg = new f_resource_graph_t (g, edgsel, vtxsel);
     ctx->resource_graph_views[ctx->params.matcher_name] = fg;
 
     //
-    // Traverse
+    // Traverse (only DFU now)
     //
     struct timeval st, et;
     gettimeofday (&st, NULL);
@@ -393,10 +380,11 @@ int main (int argc, char *argv[])
     gettimeofday (&et, NULL);
 
     //
-    // Walk elapse time
+    // Elapse time
     //
+    double elapse = elapse_time (st, et);
     cout << "*********************************************************" << endl;
-    cout << "* Elapse time "   << to_string (elapse_time (st, et)) << endl;
+    cout << "* Elapse time "   << to_string (elapse) << endl;
     cout << "*   Start Time: " << to_string (st.tv_sec)  << "."
                                << to_string (st.tv_usec) << endl;
     cout << "*   End Time: "   << to_string (et.tv_sec)  << "."

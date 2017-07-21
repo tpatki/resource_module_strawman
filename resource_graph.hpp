@@ -104,6 +104,11 @@ namespace flux_resource_model {
         std::map<single_subsystem_t, default_color_type> resource_pool_t::*
     >::type resource_color_map_t;
 
+    typedef property_map<
+        f_resource_graph_t,
+        std::string resource_pool_t::*
+    >::type resource_name_map_t;
+
     typedef boost::graph_traits<
         f_resource_graph_t
     >::vertex_iterator f_vtx_iterator;
@@ -129,9 +134,21 @@ namespace flux_resource_model {
         NEO4J_CYPHER
     };
 
-    class edge_label_writer_t {
+    template<class vtx_map_t>
+    class vtx_label_writer_t {
     public:
-        edge_label_writer_t (edg_subsystems_map_t &_props, single_subsystem_t &s)
+        vtx_label_writer_t (vtx_map_t &_m)
+            : m (_m) { }
+        void operator()(std::ostream &out, const vtx_t u) const {
+            out << "[label=\"" << m[u] << "\"]";
+        }
+    private:
+        vtx_map_t m;
+    };
+
+    class edg_label_writer_t {
+    public:
+        edg_label_writer_t (edg_subsystems_map_t &_props, single_subsystem_t &s)
             : m_props (_props), m_s (s) {}
         void operator()(std::ostream& out, const edg_t &e) const {
             multi_subsystems_t::const_iterator i = m_props[e].find (m_s);
@@ -153,4 +170,3 @@ namespace flux_resource_model {
 /*
  * vi:tabstop=4 shiftwidth=4 expandtab
  */
-
