@@ -1,0 +1,56 @@
+    <!-- DEFAULT GRAPH ATTRIBUTES FOR RESOURCE GENERATOR SPECIFICATION -->
+
+    <!-- resource pool vertex generation spec attributes -->
+    <key id="root" for="node" attr.name="root" attr.type="int">
+        <default>0</default>
+    </key>
+    <key id="type" for="node" attr.name="type" attr.type="string"/>
+    <key id="basename" for="node" attr.name="basename" attr.type="string"/>
+    <key id="size" for="node" attr.name="size" attr.type="long">
+        <default>1</default>
+    </key>
+    <key id="subsystem" for="node" attr.name="subsystem" attr.type="string">
+        <default>containment</default>
+    </key>
+
+    <!-- resource relationship generation attributes     -->
+    <key id="e_subsystem" for="edge" attr.name="e_subsystem" attr.type="string">
+        <default>containment</default>
+    </key>
+    <key id="relation" for="edge" attr.name="relation" attr.type="string">
+        <default>contains</default>
+    </key>
+    <key id="rrelation" for="edge" attr.name="rrelation" attr.type="string">
+        <default>in</default>
+    </key>
+
+    <!-- id generation method                             -->
+    <key id="id_scope" for="edge" attr.name="id_scope" attr.type="int">
+        <default>0</default>
+    </key>
+    <key id="id_start" for="edge" attr.name="id_start" attr.type="int">
+        <default>0</default>
+    </key>
+    <key id="id_stride" for="edge" attr.name="id_stride" attr.type="int">
+        <default>1</default>
+    </key>
+
+    <!-- resource gen method: multiply or associate-in   -->
+    <key id="gen_method" for="edge" attr.name="gen_method" attr.type="string">
+        <default>MULTIPLY</default>
+    </key>
+    <!-- argument (scaling factor) for multiply method   -->
+    <key id="multi_scale" for="edge" attr.name="multi_scale" attr.type="int">
+        <default>1</default>
+    </key>
+    <!-- 3 arguments for associate-in method             -->
+    <key id="as_tgt_subsystem" for="edge" attr.name="as_tgt_subsystem"
+             attr.type="string">
+        <default>containment</default>
+    </key>
+    <key id="as_tgt_uplvl" for="edge" attr.name="as_tgt_uplvl" attr.type="int">
+        <default>1</default>
+    </key>
+    <key id="as_src_uplvl" for="edge" attr.name="as_src_uplvl" attr.type="int">
+        <default>1</default>
+    </key>
