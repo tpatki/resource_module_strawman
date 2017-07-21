@@ -4,7 +4,7 @@
 #include <boost/graph/graphml.hpp>
 #include <boost/filesystem.hpp>
 
-#ifndef RESOURCE_GEN_SPEC_HPP 
+#ifndef RESOURCE_GEN_SPEC_HPP
 #define RESOURCE_GEN_SPEC_HPP 1
 
 namespace flux_resource_model {
@@ -17,7 +17,7 @@ namespace flux_resource_model {
         ASSOCIATE_BY_PATH_IN,
         GEN_UNKNOWN
     };
-    
+
     struct resource_pool_gen_t {
         int root;
         std::string type;
@@ -25,7 +25,7 @@ namespace flux_resource_model {
         long size;
         std::string subsystem;
     };
-    
+
     struct relation_gen_t {
         std::string e_subsystem;
         std::string relation;
@@ -39,7 +39,7 @@ namespace flux_resource_model {
         int as_tgt_uplvl;
         int as_src_uplvl;
     };
-    
+
     typedef adjacency_list<
         vecS,
         vecS,
@@ -47,7 +47,7 @@ namespace flux_resource_model {
         resource_pool_gen_t,
         relation_gen_t
     > gg_t;
-    
+
     typedef graph_traits<gg_t>::vertex_descriptor ggv_t;
     typedef graph_traits<gg_t>::edge_descriptor gge_t;
     typedef property_map<gg_t, std::string resource_pool_gen_t::* >::type
@@ -70,13 +70,13 @@ namespace flux_resource_model {
                 edg_id_method_map_t;
     typedef property_map<gg_t, int relation_gen_t::* >::type
                 edg_multi_scale_map_t;
-    
+
     class resource_gen_spec_t {
     public:
         resource_gen_spec_t ();
         resource_gen_spec_t (const resource_gen_spec_t &o);
         const gg_t &get_gen_graph ();
-        const gen_meth_t to_gen_method_t (const std::string &s) const; 
+        const gen_meth_t to_gen_method_t (const std::string &s) const;
         int read_graphml (const std::string &ifn);
         int write_graphviz (const std::string &ofn, bool simple=false);
 

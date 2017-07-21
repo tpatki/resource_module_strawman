@@ -99,13 +99,13 @@ const gg_t &resource_gen_spec_t::get_gen_graph ()
 //!
 //! Return gen_meth_t enum value corresponding to the string passed in.
 //!
-//! \param s    gen_method string from graphml spec 
+//! \param s    gen_method string from graphml spec
 //! \return     0 on success; -1 otherwise
 //!
 const gen_meth_t resource_gen_spec_t::to_gen_method_t (const std::string &s) const
 {
     int i;
-    for (i=0; str2genmeth[i].str != ""; ++i) 
+    for (i=0; str2genmeth[i].str != ""; ++i)
         if (str2genmeth[i].str == s)
             return (gen_meth_t)str2genmeth[i].e;
     return (gen_meth_t)str2genmeth[i].e;
@@ -134,8 +134,8 @@ int resource_gen_spec_t::read_graphml (const string &ifn)
 //!
 //! Write the resource generator recipe graph in Graphviz dot format
 //!
-//! \param ofn    output file name 
-//! \param simple if false, output will have more detailed info 
+//! \param ofn    output file name
+//! \param simple if false, output will have more detailed info
 //! \return       0 on success; -1 otherwise
 //!
 int resource_gen_spec_t::write_graphviz (const string &ofn, bool simple)

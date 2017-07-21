@@ -76,7 +76,7 @@ namespace flux_resource_model {
             member_of.clear ();
             paths.clear ();
             properties.clear ();
-        } 
+        }
         std::string type;
         std::map<std::string, std::string> paths;
         std::string basename;

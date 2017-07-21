@@ -174,7 +174,7 @@ namespace flux_resource_model {
 
         //!
         //! Called back on traversing an back edge of an auxiliary subsystem
-        //! The target vertex is being visited by the upwalk on the same subsystem 
+        //! The target vertex is being visited by the upwalk on the same subsystem
         //!
         //! \param e     descriptor of the traversing edge
         //! \param g     filtered resource graph object
