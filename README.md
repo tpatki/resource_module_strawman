@@ -35,7 +35,7 @@ the doc directory. Open doc/html/index.html using your favorite web browser. NOT
 
 ## Generating Resources Using GraphML (GRUG)
 
-###Overview
+### Overview
 GRUG is a GraphML-based language for specifying a resource-graph generation recipe.
 The resource service strawman can read in a GRUG file and populate its store
 of the resource graph data conforming to Flux’s resource model
@@ -58,7 +58,7 @@ useful:
 - [GraphML Primer](http://graphml.graphdrawing.org/primer/graphml-primer.html)
 - [Graph Markup Language](https://cs.brown.edu/~rt/gdhandbook/chapters/graphml.pdf)
 
-###GRUG 
+### GRUG 
 GRUG describes a resource-generation recipe as a graph. A vertex prescribes
 how the corresponding resource pool (or simply resource as a shorthand) should be generated;
 an edge prescribes how the corresponding relationships between two resources
@@ -76,7 +76,7 @@ a distinct resource hierarchy or subsystem. We use a hierarchy and subsystem int
 A conforming GRUG file is composed of two sections: 1) recipe graph
 definition and 2) recipe attributes declaration. We explain both in the following sections.
 
-###Recipe Graph Definition
+### Recipe Graph Definition
 
 A recipe graph definition is expressed GraphML’s as `graph` elements
 consisting of two nested elements: `node` and `edge`. A `node` element
@@ -171,7 +171,7 @@ hierarchical path at its parent level (i.e., `as_tgt_uplvl`=1)
 is matched with the hierarchical path of the source resource
 (also at the parent level, `as_src_uplvl`=1).
 
-###Recipe Attributes Declaration 
+### Recipe Attributes Declaration 
 
 This section appears right after the GraphML header and
 before the recipe graph section.
@@ -225,11 +225,11 @@ So, 16 cores in each node will have 0-15, instead of repeating
 0-7 and 0-7, which will be the case if the `id_scope` is 0.
 
 
-###Example GRUG Files
+### Example GRUG Files
 Example GRUG files can be found in `conf/` directory. `medium-1subsystem-coarse.graphml` shows how one can model a resource graph in a highly coarse manner with no additional subsystem-based organization. `mini-5subsystems-fine.graphml` shows one way to model a fairly complex resource graph with five distinct subsystems to support matchers of various types.
 
  
-###GRUG Visualizer
+### GRUG Visualizer
 `genspec-graphml2dot` utility can be used to generate a GraphViz dot file that can render the recipe graph. The dot file can be converted into svg format by typing in `dot -Tsvg output.dot -o output.svg`:
 
 ```
