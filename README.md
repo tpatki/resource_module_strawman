@@ -68,7 +68,7 @@ in a specific manner.
 
 The resource service strawman walks this recipe graph using
 the depth first search traversal and emits and stores the corresponding
-resource and their relationship data into its resource graph store.  
+resources and their relationship data into its resource graph store.  
 The recipe graph must be a forest of trees whereby each tree represents
 a distinct resource hierarchy or subsystem. We use a hierarchy and subsystem interchangeably below.
 
@@ -77,7 +77,7 @@ definition and 2) recipe attributes declaration. We explain both in the followin
 
 ### Recipe Graph Definition
 
-A recipe graph definition is expressed GraphML’s as `graph` elements
+A recipe graph definition is expressed as GraphML’s `graph` elements
 consisting of two nested elements: `node` and `edge`. A `node` element
 prescribes ways to generate a resource pool (RFC4); and an edge
 for generating relationships. For example, given the following
@@ -141,7 +141,7 @@ and associative edges are used for this purpose.
 ```
 
 Here, this `edge` element is the generation recipe for
-the relationship between powerpanel and `pdu` resource.
+the relationship between `powerpanel` and `pdu` resource.
 It specifies that a `powerpanel` resource will be associated
 (i.e., `ASSOCIATE_IN`), all of the `pdu` resources
 that have already generated in the `containment` subsystem. 
@@ -150,7 +150,7 @@ relationship is `flows`.
 
 Oftentimes, association with all resources of a type is not
 sufficient to make fine-grained association. For the case where the hierarchical paths of 
-associating resources can be used to make associations, `ASSOCIATE\_BY\_PATH\_IN` generation
+associating resources can be used to make associations, `ASSOCIATE_BY_PATH_IN` generation
 method can be used.
 
 ```xml
@@ -173,7 +173,7 @@ is matched with the hierarchical path of the source resource
 ### Recipe Attributes Declaration 
 
 This section appears right after the GraphML header and
-before the recipe graph section.
+before the recipe graph definition section.
 To be a valid GRUG, this section must declare all attributes for both `node`
 and `edge` elements. Currently, here are 16 attributes must be 
 declared. 5 for the `node` element and 11 for the `edge`
@@ -207,16 +207,16 @@ value for an attribute, having the default in the attribute will save you specif
 Only a few attributes have not been explained. The `root` attribute specifies if a
 resource is a root of a subsystem. If root, 1 must be assigned.
 
-`id_scope`, `id_start` and `id_stride` specifies how the id field of a
+`id_scope`, `id_start` and `id_stride` specify how the id field of a
 resource will be generated. The integer specified with `id_scope`
-defines the scope in which the id should be generated. 
+defines the scope in which the resource id should be generated. 
 The scope is local to its ancestor level defined by `id_scope`.
 If `id_scope` is higher than the most distant ancestor, then
 the id space becomes global. 
 
 For example,
-if `id_scope`=0, id of the generating resource will be local to its parent.
-If `id_scope`=1, id is local to its grand parent
+if `id_scope`=0, the id of the generating resource will be local to its parent.
+If `id_scope`=1, the id becomes local to its grand parent
 For example, in `rack[1]->node[18]->socket[2]->core[8]` configuration,
 if `id_scope` is 1, the id space of a core resource is local to
 the node level instead of the socket level.
@@ -225,7 +225,7 @@ So, 16 cores in each node will have 0-15, instead of repeating
 
 
 ### Example GRUG Files
-Example GRUG files can be found in `conf/` directory. `medium-1subsystem-coarse.graphml` shows how one can model a resource graph in a highly coarse manner with no additional subsystem-based organization. `mini-5subsystems-fine.graphml` shows one way to model a fairly complex resource graph with five distinct subsystems to support matchers of various types.
+Example GRUG files can be found in `conf/` directory. `medium-1subsystem-coarse.graphml` shows how one can model a resource graph in a highly coarse manner with no additional subsystem-based organization. `mini-5subsystems-fine.graphml` shows one way to model a fairly complex resource graph with five distinct subsystems to support the matchers of various types.
 
  
 ### GRUG Visualizer
