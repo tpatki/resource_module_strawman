@@ -17,7 +17,7 @@ static const struct option longopts[] = {
 void usage (int code)
 {
     cerr <<
-"Usage: genspec-graphml2dot <genspec>.graphml\n"
+"Usage: grug2dot <genspec>.graphml\n"
 "    Convert a resource-graph generator spec (<genspec>.graphml)\n"
 "    to AT&T GraphViz format (<genspec>.dot). The output\n"
 "    file only contains the basic information unless --more is given.\n"
