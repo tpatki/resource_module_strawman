@@ -2,17 +2,18 @@
 
 Flux Resource API Strawman helps design flux resource comms. module,
 which will be a service to select the best-matching resources for
-each job. Some of the data structures and APIs will be factored into
-the comms. module code base.
+each job. Ultimately, some of the data structures and APIs will be
+factored into the comms. module code base.
 
-It contains a `resource` command which uses a resource generation
-recipe file (see GRUG below), and print resource information at
+It contains `resource`, the driver command which uses a resource generation
+recipe file (see GRUG below), and prints the resource information at
 certain visit events of graph walks. Its options allow for using
 a different matcher that uses a different set of subsystems
- on which to walk with distinct walking policies.
+on which to walk with distinct walking policies.
 
 It also allows you to export the filtered graph of the used matcher
-in a selected graph format. If you want to try this yourself to get a hang of it:
+in a selected graph format. If you want to try this yourself to get
+a hang of it:
 
 ```
 $ make
@@ -29,7 +30,10 @@ $ doxygen doxy_conf.txt
 $ cd ..
 ```
 This will generate html, latex and man sub-directories under
-the doc directory. Open doc/html/index.html using your favorite web browser. NOTE for LLNL developers: It doesn't build on TOSS2 systems because their compilers are old. Please use a TOSS3 machine or your own laptop (e.g. Mac OSX)
+the doc directory. Open doc/html/index.html using your favorite web
+browser. NOTE for LLNL developers: It doesn't build on TOSS2 systems
+because their compilers are old. Please use a TOSS3 machine or your
+own laptop (e.g. Mac OSX)
 
 
 ## Generating Resources Using GraphML (GRUG)
@@ -41,8 +45,8 @@ of the resource graph data conforming to Flux’s resource model
 ([RFC4](https://github.com/flux-framework/rfc/blob/master/spec_4.adoc)).
 The goal of GRUG is to help Flux scheduler plug-in developers easily determine
 the representation of this resource graph data (e.g., granularity of resource pools,
-relationships between resources, and subsystems/hierarchies to use to organize the resources)
-that are best suited for their scheduling objectives and algorithms.  
+relationships between resources, and subsystems/hierarchies to use to organize
+the resources) that are best suited for their scheduling objectives and algorithms.  
 Without having to modify the source code of the resource service strawman,
 developers can quickly test various resource graph representations by
 only modifying the GRUG text file.
@@ -59,28 +63,33 @@ useful:
 
 ### GRUG 
 GRUG describes a resource-generation recipe as a graph. A vertex prescribes
-how the corresponding resource pool (or simply resource as a shorthand) should be generated;
+how the corresponding resource pool (or simply resource as a shorthand) should
+be generated;
 an edge prescribes how the corresponding relationships between two resources
-should be generated. The edge properties also allow a small recipe graph to generate a large and more complex resource graph store.
-A multiplicative edge has a scaling factor that will generate the specified number of copies of the resources of the target type. An associative edge
+should be generated. The edge properties also allow a small recipe graph
+to generate a large and more complex resource graph store.
+A multiplicative edge has a scaling factor that will generate the specified
+number of copies of the resources of the target type. An associative edge
 allows a source resource to be associated with some of the already generated resources
 in a specific manner.
 
 The resource service strawman walks this recipe graph using
-the depth first search traversal and emits and stores the corresponding
+the depth-first-search traversal and emits and stores the corresponding
 resources and their relationship data into its resource graph store.  
 The recipe graph must be a forest of trees whereby each tree represents
-a distinct resource hierarchy or subsystem. We use a hierarchy and subsystem interchangeably below.
+a distinct resource hierarchy or subsystem. We use the terms, hierarchy
+and subsystem interchangeably.
 
 A conforming GRUG file is composed of two sections: 1) recipe graph
-definition and 2) recipe attributes declaration. We explain both in the following sections.
+definition and 2) recipe attributes declaration. We explain both
+in the following sections.
 
 ### Recipe Graph Definition
 
 A recipe graph definition is expressed as GraphML’s `graph` elements
 consisting of two nested elements: `node` and `edge`. A `node` element
-prescribes ways to generate a resource pool (RFC4); and an edge
-for generating relationships. For example, given the following
+prescribes ways to generate a resource pool and an edge
+for generating relationships (RFC 4). For example, given the following
 definition,
 
 ```xml
@@ -99,7 +108,7 @@ definition,
 </node>
 ```
 these `node` elements are the generation recipes
-for a socket and core resource (i.e., scalar), respectively.
+for a socket and compute-core resource (i.e., scalar), respectively.
 And they belong to the containment hierarchy.
 
 
@@ -143,13 +152,13 @@ and associative edges are used for this purpose.
 Here, this `edge` element is the generation recipe for
 the relationship between `powerpanel` and `pdu` resource.
 It specifies that a `powerpanel` resource will be associated
-(i.e., `ASSOCIATE_IN`), all of the `pdu` resources
-that have already generated in the `containment` subsystem. 
+(i.e., `ASSOCIATE_IN`) with all of the `pdu` resources
+that have already generated within the `containment` subsystem. 
 The forward relationship is `drawn` and the reverse
 relationship is `flows`.
 
 Oftentimes, association with all resources of a type is not
-sufficient to make fine-grained association. For the case where the hierarchical paths of 
+sufficient to make a fine-grained association. For the case where the hierarchical paths of 
 associating resources can be used to make associations, `ASSOCIATE_BY_PATH_IN` generation
 method can be used.
 
@@ -175,12 +184,13 @@ is matched with the hierarchical path of the source resource
 This section appears right after the GraphML header and
 before the recipe graph definition section.
 To be a valid GRUG, this section must declare all attributes for both `node`
-and `edge` elements. Currently, here are 16 attributes must be 
+and `edge` elements. Currently, there are 16 attributes that must be 
 declared. 5 for the `node` element and 11 for the `edge`
-elements. You are encouraged to define default values for
-each of the attributes, which then can lead to more concise
-recipe definitions. If a graph element is supposed to have the default
-value for an attribute, having the default in the attribute will save you specifying it in the definition. These 16 attributes are the following:
+elements. You are encouraged to define the default value for
+each attribute, which then can lead to more concise
+recipe definitions. A graph element will inherit the default
+attribute values unless it specifically overrides them.
+The 16 attributes are listed in the following:
 
 ```xml
 <-- attributes for the recipe node elements -->
@@ -204,8 +214,8 @@ value for an attribute, having the default in the attribute will save you specif
 <key id="as_src_uplvl" for="edge" attr.name="as_src_uplvl" attr.type="int"/>
 ```
 
-Only a few attributes have not been explained. The `root` attribute specifies if a
-resource is a root of a subsystem. If root, 1 must be assigned.
+The `root` attribute specifies if a
+resource is the root of a subsystem. If root, 1 must be assigned.
 
 `id_scope`, `id_start` and `id_stride` specify how the id field of a
 resource will be generated. The integer specified with `id_scope`
@@ -225,15 +235,22 @@ So, 16 cores in each node will have 0-15, instead of repeating
 
 
 ### Example GRUG Files
-Example GRUG files can be found in `conf/` directory. `medium-1subsystem-coarse.graphml` shows how one can model a resource graph in a highly coarse manner with no additional subsystem-based organization. `mini-5subsystems-fine.graphml` shows one way to model a fairly complex resource graph with five distinct subsystems to support the matchers of various types.
+Example GRUG files can be found in `conf/` directory.
+`medium-1subsystem-coarse.graphml` shows how one can model
+a resource graph in a highly coarse manner with no additional
+subsystem-based organization. `mini-5subsystems-fine.graphml` shows
+one way to model a fairly complex resource graph with five
+distinct subsystems to support the matchers of various types.
 
  
 ### GRUG Visualizer
-`genspec-graphml2dot` utility can be used to generate a GraphViz dot file that can render the recipe graph. The dot file can be converted into svg format by typing in `dot -Tsvg output.dot -o output.svg`:
+`grug2dot` utility can be used to generate a GraphViz dot file
+that can render the recipe graph. The dot file can be converted
+into svg format by typing in `dot -Tsvg output.dot -o output.svg`:
 
 ```
-Usage: genspec-graphml2dot <genspec>.graphml
-    Convert a resource-graph generator spec (<genspec>.graphml)
+Usage: grug2dot <genspec>.graphml
+    Convert a GRUG resource-graph generator spec (<genspec>.graphml)
     to AT&T GraphViz format (<genspec>.dot). The output
     file only contains the basic information unless --more is given.
 
