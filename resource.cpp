@@ -19,11 +19,10 @@ using namespace std;
 using namespace boost;
 using namespace flux_resource_model;
 
-#define OPTIONS "e:m:l:d:g:o:h"
+#define OPTIONS "G:m:d:g:o:h"
 static const struct option longopts[] = {
-    {"gengraph",         required_argument,  0, 'e'},
+    {"grug",             required_argument,  0, 'G'},
     {"matcher",          required_argument,  0, 'm'},
-    {"list-subsystems",  required_argument,  0, 'l'},
     {"display-matchers", required_argument,  0, 'd'},
     {"graph-format",     required_argument,  0, 'g'},
     {"output",           required_argument,  0, 'o'},
@@ -52,21 +51,20 @@ struct resource_context_t {
 static void usage (int code)
 {
     cerr <<
-"usage: resource-proto [OPTIONS…]\n"
+"usage: resource [OPTIONS…]\n"
 "\n"
-"Resource prototype v1.0 to help design flux resource comms. module,\n"
+"Resource service strawman to help design flux resource comms. module,\n"
 "which will be a service to select the best-matching resources for\n"
 "each job.\n"
 "\n"
-"Some of the data structures and APIs will be factored into\n"
-"the comms. module.\n"
+"Some of the data structures and APIs used in this strawman will be \n"
+"factored into the comms. module.\n"
 "\n"
-"Build a predefined test resource graph containing five distinct\n"
-"subsystems (a.k.a. hierarchies), and print resource information at\n"
-"certain visit events of graph walks."
+"Build a test resource-graph store based on the resource-graph generation\n"
+"recipe written in GRUG format and print the resource information at\n"
+"various visit events of the resource-graph walk."
 "\n"
-"OPTIONS allow for using a resource graph of varying sizes and\n"
-"configurations, as well as a different matcher that uses a different\n"
+"OPTIONS allow for using a different matcher that uses a different\n"
 "set of subsystems on which to walk with distinct walking policies.\n"
 "\n"
 "OPTIONS allow for exporting the filtered graph of the used matcher\n"
@@ -77,14 +75,14 @@ static void usage (int code)
 "    -h, --help\n"
 "            Display the usage information\n"
 "\n"
-"    -e, --gengraph=<genspec>.graphml\n"
-"            Resource graph generator specification file in graphml\n"
+"    -G, --grug=<genspec>.graphml\n"
+"            GRUG resource graph generator specification file in graphml\n"
 "            (default=conf/default)\n"
 "\n"
 "    -m, --matcher="
          "<CA|IBA|IBBA|PFS1BA|PA|C+IBA|C+PFS1BA|C+PA|IB+IBBA|"
               "C+P+IBA|VA|V+PFS1BA|ALL>\n"
-"            Set the matcher to use. Available matchers are:\n"
+"            Set the test matcher to use. Available matchers are:\n"
 "                CA: Containment Aware\n"
 "                IBA: InfiniBand connection-Aware\n"
 "                IBBA: InfiniBand Bandwidth-Aware\n"
@@ -100,10 +98,6 @@ static void usage (int code)
 "                ALL: Aware of everything.\n"
 "            (default=CA).\n"
 "\n"
-"    -l, --list-subsystems\n"
-"            List all available subsystems (a.k.a. hierarchies)\n"
-"            in the resource graph\n"
-"\n"
 "    -g, --graph-format=<dot|graphml|cypher>\n"
 "            Specify the graph format of the output file\n"
 "            (default=dot)\n"
@@ -112,7 +106,6 @@ static void usage (int code)
 "            Set the basename of the output file\n"
 "            For AT&T Graphviz dot, <basename>.dot\n"
 "            For GraphML, <basename>.graphml\n"
-"            For Neo4j, <basename>.cypher\n"
 "\n";
     exit (code);
 }
@@ -164,7 +157,7 @@ static int graph_format_to_ext (resource_graph_format_t &format, string &st)
 static int subsystem_exist (resource_context_t *ctx, string n)
 {
     int rc = 0;
-    if (ctx->db.roots.find ("containment") == ctx->db.roots.end ())
+    if (ctx->db.roots.find (n) == ctx->db.roots.end ())
         rc = -1;
     return rc;
 }
@@ -199,25 +192,25 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
     else if (iequals (matcher_type, string ("C+PFS1BA"))) {
         if ( (rc = subsystem_exist (ctx, "containment")) == 0)
             matcher.add_subsystem ("containment", "contains");
-        if ( !rc && (rc = subsystem_exist (ctx, "PFS1BA")) == 0)
+        if ( !rc && (rc = subsystem_exist (ctx, "pfs1bw")) == 0)
             matcher.add_subsystem ("pfs1bw", "*");
     }
     else if (iequals (matcher_type, string ("C+IBA"))) {
         if ( (rc = subsystem_exist (ctx, "containment")) == 0)
             matcher.add_subsystem ("containment", "contains");
-        if ( !rc && (rc = subsystem_exist (ctx, "PFS1BA")) == 0)
+        if ( !rc && (rc = subsystem_exist (ctx, "ibnet")) == 0)
             matcher.add_subsystem ("ibnet", "connected_up");
     }
     else if (iequals (matcher_type, string ("C+PA"))) {
         if ( (rc = subsystem_exist (ctx, "containment")) == 0)
             matcher.add_subsystem ("containment", "contains");
-        if ( !rc && (rc = subsystem_exist (ctx, "PA")) == 0)
+        if ( !rc && (rc = subsystem_exist (ctx, "power")) == 0)
             matcher.add_subsystem ("power", "drawn");
     }
     else if (iequals (matcher_type, string ("IB+IBBA"))) {
         if ( (rc = subsystem_exist (ctx, "ibnet")) == 0)
             matcher.add_subsystem ("ibnet", "connected_down");
-        if ( !rc && (rc = subsystem_exist (ctx, "IBBA")) == 0)
+        if ( !rc && (rc = subsystem_exist (ctx, "ibnetbw")) == 0)
             matcher.add_subsystem ("ibnetbw", "*");
     }
     else if (iequals (matcher_type, string ("C+P+IBA"))) {
@@ -225,12 +218,12 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
             matcher.add_subsystem ("containment", "contains");
         if ( (rc = subsystem_exist (ctx, "power")) == 0)
             matcher.add_subsystem ("power", "drawn");
-        if ( !rc && (rc = subsystem_exist (ctx, "IBA")) == 0)
+        if ( !rc && (rc = subsystem_exist (ctx, "ibnet")) == 0)
             matcher.add_subsystem ("ibnet", "connected_up");
     } else if (iequals (matcher_type, string ("V+PFS1BA"))) {
         if ( (rc = subsystem_exist (ctx, "virtual1")) == 0)
             matcher.add_subsystem ("virtual1", "*");
-        if ( !rc && (rc = subsystem_exist (ctx, "PFS1BW")) == 0)
+        if ( !rc && (rc = subsystem_exist (ctx, "pfs1bw")) == 0)
             matcher.add_subsystem ("pfs1bw", "*");
     } else if (iequals (matcher_type, string ("VA"))) {
         if ( (rc = subsystem_exist (ctx, "virtual1")) == 0)
@@ -238,11 +231,11 @@ static int set_subsystems_use (resource_context_t *ctx, string n)
     } else if (iequals (matcher_type, string ("ALL"))) {
         if ( (rc = subsystem_exist (ctx, "containment")) == 0)
             matcher.add_subsystem ("containment", "*");
-        if ( !rc && (rc = subsystem_exist (ctx, "IBA")) == 0)
+        if ( !rc && (rc = subsystem_exist (ctx, "ibnet")) == 0)
             matcher.add_subsystem ("ibnet", "*");
-        if ( !rc && (rc = subsystem_exist (ctx, "IBBA")) == 0)
+        if ( !rc && (rc = subsystem_exist (ctx, "ibnetbw")) == 0)
             matcher.add_subsystem ("ibnetbw", "*");
-        if ( !rc && (rc = subsystem_exist (ctx, "PFS1BW")) == 0)
+        if ( !rc && (rc = subsystem_exist (ctx, "pfs1bw")) == 0)
             matcher.add_subsystem ("pfs1bw", "*");
         if ( (rc = subsystem_exist (ctx, "power")) == 0)
             matcher.add_subsystem ("power", "*");
@@ -314,7 +307,7 @@ int main (int argc, char *argv[])
             case 'h': /* --help */
                 usage (0);
                 break;
-            case 'e': /* --genspec-graph*/
+            case 'G': /* --grug*/
                 ctx->params.gengraph = optarg;
                 rc = 0;
                 break;
@@ -358,7 +351,7 @@ int main (int argc, char *argv[])
     //
     cout << "[INFO] Load the matcher ..." << endl;
     if (set_subsystems_use (ctx, ctx->params.matcher_name) != 0) {
-        cerr << "[ERROR] error in finding the matcher: "
+        cerr << "[ERROR] couldn't find all subsystems mapped to "
              << ctx->params.matcher_name << endl;
         return EXIT_FAILURE;
     }
