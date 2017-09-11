@@ -173,6 +173,7 @@ template<typename dfu_matcher_t>
         default_color_type c;
         color[v][matcher.get_dom_subsystem ()] = gray_color;
 
+       
         if (matcher.dom_discover_vtx (v, g) == MATCHER_WALK_PRUNED)
             return MATCHER_WALK_PRUNED;
 

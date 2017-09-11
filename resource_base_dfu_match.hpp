@@ -38,7 +38,7 @@ namespace flux_resource_model {
         //!                  needs to be pruned;
         //!                  otherwise MATCHER_SCORE_BASELINE
         //!
-        int dom_discover_vtx (vtx_t u, f_resource_graph_t &g)
+        virtual int dom_discover_vtx (vtx_t u, f_resource_graph_t &g)
         {
             incr ();
             std::cout << level_prefix ()
@@ -60,7 +60,7 @@ namespace flux_resource_model {
         //! \return      return a score calculated based on the subtree and up walks.
         //!              any score aboved MATCHER_SCORE_BASELINE is qualified to be a match
         //!
-        int dom_finish_vtx (vtx_t u, std::map<single_subsystem_t,
+        virtual int dom_finish_vtx (vtx_t u, std::map<single_subsystem_t,
                 std::vector<int> > &score_map, f_resource_graph_t &g)
         {
             std::cout << level_prefix ()
@@ -77,7 +77,7 @@ namespace flux_resource_model {
         //! \param e     descriptor of the traversing edge
         //! \param g     filtered resource graph object
         //!
-        int dom_tree_edge (edg_t e, f_resource_graph_t &g)
+        virtual int dom_tree_edge (edg_t e, f_resource_graph_t &g)
         {
             std::cout << level_prefix ()
                       << "dom_tree_edge: "
@@ -93,7 +93,7 @@ namespace flux_resource_model {
         //! \param e     descriptor of the traversing edge
         //! \param g     filtered resource graph object
         //!
-        int dom_back_edge (edg_t e, f_resource_graph_t &g)
+        virtual int dom_back_edge (edg_t e, f_resource_graph_t &g)
         {
             std::cout << level_prefix ()
                       << "dom_back_edge: CYCLE! CYCLE! in the graph"
@@ -108,7 +108,7 @@ namespace flux_resource_model {
         //! \param e     descriptor of the traversing edge
         //! \param g     filtered resource graph object
         //!
-        int dom_forward_or_cross_edge (edg_t e, f_resource_graph_t &g)
+        virtual int dom_forward_or_cross_edge (edg_t e, f_resource_graph_t &g)
         {
             std::cout << level_prefix ()
                       << "dom_forward_or_cross_edge: PROBLEM! PROBLEM!"
@@ -123,7 +123,7 @@ namespace flux_resource_model {
         //! \return      return MATCHER_WALK_PRUNED when further searching
         //!              needs to be pruned; otherwise MATCHER_SCORE_BASELINE
         //!
-        int aux_discover_vtx (vtx_t u, f_resource_graph_t &g)
+        virtual int aux_discover_vtx (vtx_t u, f_resource_graph_t &g)
         {
             incr ();
             std::cout << level_prefix ()
@@ -146,7 +146,7 @@ namespace flux_resource_model {
         //!              and up walks. Any score aboved MATCHER_SCORE_BASELINE
         //!              is qualified to be a match
         //!
-        int aux_finish_vtx (vtx_t u, std::map<single_subsystem_t,
+        virtual int aux_finish_vtx (vtx_t u, std::map<single_subsystem_t,
                 std::vector<int> > &score_map, f_resource_graph_t &g)
         {
             std::cout << level_prefix ()
@@ -164,7 +164,7 @@ namespace flux_resource_model {
         //! \param e     descriptor of the traversing edge
         //! \param g     filtered resource graph object
         //!
-        int aux_up_edge (edg_t e, f_resource_graph_t &g)
+        virtual int aux_up_edge (edg_t e, f_resource_graph_t &g)
         {
             std::cout << level_prefix ()
                       << "aux_up_edge: "
@@ -179,7 +179,7 @@ namespace flux_resource_model {
         //! \param e     descriptor of the traversing edge
         //! \param g     filtered resource graph object
         //!
-        int aux_up_back_edge (edg_t e, f_resource_graph_t &g)
+        virtual int aux_up_back_edge (edg_t e, f_resource_graph_t &g)
         {
             std::cout << level_prefix ()
                       << "aux_up_back_edge: CYCLE! CYCLE! "
@@ -194,7 +194,7 @@ namespace flux_resource_model {
         //! \param e     descriptor of the traversing edge
         //! \param g     filtered resource graph object
         //!
-        int aux_up_forward_edge (edg_t e, f_resource_graph_t &g)
+        virtual int aux_up_forward_edge (edg_t e, f_resource_graph_t &g)
         {
             std::cout << level_prefix ()
                       << "aux_up_forward_edge: MAKE SURE THIS IS OK"
@@ -202,7 +202,7 @@ namespace flux_resource_model {
             return MATCHER_SCORE_BASELINE;
         }
 
-    private:
+    protected:
 
         std::string level_prefix ()
         {
